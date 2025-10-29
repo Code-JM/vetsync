@@ -111,11 +111,12 @@ $userFullName = $currentUser['name'] ?? '';
 
             <!-- Pet Dropdown -->
             <div class="field">
-                <label for="pet_uuid">Select Pet <span style="color: red;">*</span></label>
-                <select name="pet_uuid" id="bookNowPetDropdown" class="ui dropdown" required>
-                    <option value="">Select your pet</option>
+                <label for="pet_uuids">Select Pet(s) <span style="color: red;">*</span></label>
+                <select name="pet_uuids[]" id="bookNowPetDropdown" class="ui fluid dropdown" multiple required>
+                    <option value="">Select your pet(s)</option>
                     <!-- Pets will be loaded here by JS -->
                 </select>
+                <small class="text-muted">You can select multiple pets for this appointment</small>
             </div>
 
             <!-- Services -->

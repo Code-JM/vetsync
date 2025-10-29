@@ -680,10 +680,16 @@
         const statusColor = statusColors[firstApt.status] || 'grey';
         const statusLabel = statusLabels[firstApt.status] || firstApt.status;
 
-        // Build service list
-        const servicesList = appointmentGroup.map(apt => {
-            const cleanNote = cleanSystemNotes(apt.note);
-            return `<li><strong>${apt.service_name || 'Custom Service'}</strong>${cleanNote && !cleanNote.includes('CUSTOM') ? ' - ' + cleanNote : ''}</li>`;
+        // Get unique pets and services
+        const uniquePets = [...new Set(appointmentGroup.map(apt => apt.pet_name))];
+        const uniqueServices = [...new Set(appointmentGroup.map(apt => apt.service_name || 'Custom Service'))];
+
+        const petCount = uniquePets.length;
+        const serviceCount = uniqueServices.length;
+
+        // Build service list (show unique services only)
+        const servicesList = uniqueServices.map(service => {
+            return `<li><strong>${service}</strong></li>`;
         }).join('');
 
         let actionButtons = '';
@@ -728,9 +734,9 @@
                 </div>
                 <div class="content">
                     <div class="header">
-                        ${firstApt.pet_name || 'Unknown Pet'}
+                        ${uniquePets.join(', ')}
                         <span class="ui mini blue label" style="margin-left: 0.5rem;">
-                            <i class="layer group icon"></i> Group Booking (${appointmentGroup.length} services)
+                            <i class="layer group icon"></i> Group Booking (${serviceCount} service${serviceCount > 1 ? 's' : ''} × ${petCount} pet${petCount > 1 ? 's' : ''})
                         </span>
                         <span class="ui ${statusColor} label" style="float: right;">${statusLabel}</span>
                     </div>

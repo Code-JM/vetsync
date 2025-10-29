@@ -606,16 +606,42 @@ function tableRowHtml(
     // Group styling classes and badge
     let groupClasses = "";
     let groupBadge = "";
+    let petDisplay = app.pet_name || "Unknown Pet";
+    let serviceDisplay = serviceName;
 
     if (groupInfo.isGrouped && groupInfo.isCollapsed) {
-        const additionalCount = groupInfo.groupSize - 1;
+        // Get unique pets and services from the group
+        const uniquePets = [
+            ...new Set(groupInfo.groupData.map((a) => a.pet_name)),
+        ];
+        const uniqueServices = [
+            ...new Set(
+                groupInfo.groupData.map(
+                    (a) =>
+                        a.service_name ||
+                        (a.note && a.note.includes("CUSTOM SERVICE REQUEST:")
+                            ? "Custom Service"
+                            : "N/A")
+                )
+            ),
+        ];
+
+        const petCount = uniquePets.length;
+        const serviceCount = uniqueServices.length;
+
         groupClasses = "group-collapsed cursor-pointer";
+
+        // Update displays
+        petDisplay = uniquePets.join(", ");
+        serviceDisplay = uniqueServices[0]; // Show first service
+
+        // Create informative badge
         groupBadge = `
                 <span class="text-primary ms-2" style="font-size: 0.85rem; cursor: pointer;">
                     <i class="bx bx-chevron-right group-expand-icon"></i>
-                    + ${additionalCount} more service${
-            additionalCount > 1 ? "s" : ""
-        }
+                    ${serviceCount} service${
+            serviceCount > 1 ? "s" : ""
+        } × ${petCount} pet${petCount > 1 ? "s" : ""}
                 </span>
             `;
 
@@ -653,9 +679,7 @@ function tableRowHtml(
                          style="width: 32px; height: 32px; object-fit: cover;"
                          onerror="this.src='/public/img/placeholders/image.png'">
                     <div>
-                        <div class="fw-bold">${
-                            app.pet_name || "Unknown Pet"
-                        }</div>
+                        <div class="fw-bold">${petDisplay}</div>
                         <small class="text-muted">ID: ${
                             app.pet_uuid ? app.pet_uuid.substring(0, 8) : "N/A"
                         }</small>
@@ -667,7 +691,7 @@ function tableRowHtml(
                 <small class="text-muted">${app.user_email || ""}</small>
             </td>
             <td>
-    <div class="fw-bold">${serviceName}${groupBadge}</div>
+    <div class="fw-bold">${serviceDisplay}${groupBadge}</div>
     ${
         shortInstructions &&
         shortInstructions.trim() !== "" &&

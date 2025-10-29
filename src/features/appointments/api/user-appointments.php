@@ -59,14 +59,14 @@ try {
 
         if ($_POST['action'] === 'add_multiple') {
             $service_uuids = json_decode($_POST['service_uuids'] ?? '[]', true);
-            $pet_uuid = $_POST['pet_uuid'] ?? null;
+            $pet_uuids = json_decode($_POST['pet_uuids'] ?? '[]', true);
             $date = $_POST['date'] ?? null;
             $time = $_POST['time'] ?? null;
             $note = $_POST['note'] ?? '';
             $custom_service_request = $_POST['custom_service_request'] ?? null;
 
             // Validate required fields
-            if (!$pet_uuid || !$date) {
+            if (!$date) {
                 echo json_encode(['success' => false, 'message' => 'Missing required fields']);
                 exit;
             }
@@ -77,13 +77,21 @@ try {
                 exit;
             }
 
-            // Validate pet belongs to user
-            global $conn;
-            $stmt = $conn->prepare('SELECT user_uuid FROM pets WHERE uuid = ? AND user_uuid = ? LIMIT 1');
-            $stmt->execute([$pet_uuid, $userUuid]);
-            $pet = $stmt->fetch(PDO::FETCH_ASSOC);
+            // Validate pet selection
+            if (empty($pet_uuids) || !is_array($pet_uuids)) {
+                echo json_encode(['success' => false, 'message' => 'Please select at least one pet']);
+                exit;
+            }
 
-            if (!$pet) {
+            // Validate all pets belong to user
+            global $conn;
+            $placeholders = implode(',', array_fill(0, count($pet_uuids), '?'));
+            $stmt = $conn->prepare("SELECT uuid FROM pets WHERE uuid IN ($placeholders) AND user_uuid = ?");
+            $params = array_merge($pet_uuids, [$userUuid]);
+            $stmt->execute($params);
+            $validPets = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            if (count($validPets) !== count($pet_uuids)) {
                 echo json_encode(['success' => false, 'message' => 'Invalid pet selection']);
                 exit;
             }
@@ -118,7 +126,7 @@ try {
                 }
             }
 
-            // Generate a shared booking group ID for multiple services
+            // Generate a shared booking group ID for multiple services/pets
             $bookingGroupId = uuid();
             $appointmentCount = 0;
             $successCount = 0;
@@ -127,39 +135,42 @@ try {
                 // Begin transaction
                 $conn->beginTransaction();
 
-                foreach ($service_uuids as $service_uuid) {
-                    $appointmentCount++;
-                    $appointmentNote = $note;
-                    $actualServiceUuid = $service_uuid;
+                // Create appointments for each combination of pet and service
+                foreach ($pet_uuids as $pet_uuid) {
+                    foreach ($service_uuids as $service_uuid) {
+                        $appointmentCount++;
+                        $appointmentNote = $note;
+                        $actualServiceUuid = $service_uuid;
 
-                    // Handle "Others" custom service request
-                    if ($service_uuid === 'others') {
-                        if (!$custom_service_request || trim($custom_service_request) === '') {
-                            throw new Exception('Please describe the custom service you need');
+                        // Handle "Others" custom service request
+                        if ($service_uuid === 'others') {
+                            if (!$custom_service_request || trim($custom_service_request) === '') {
+                                throw new Exception('Please describe the custom service you need');
+                            }
+                            $actualServiceUuid = null;
+                            $appointmentNote = "CUSTOM SERVICE REQUEST: " . trim($custom_service_request) .
+                                ($note ? "\n\nAdditional Notes: " . $note : "");
                         }
-                        $actualServiceUuid = null;
-                        $appointmentNote = "CUSTOM SERVICE REQUEST: " . trim($custom_service_request) .
-                            ($note ? "\n\nAdditional Notes: " . $note : "");
-                    }
 
-                    // Generate UUID for each appointment
-                    $appointmentUuid = uuid();
+                        // Generate UUID for each appointment
+                        $appointmentUuid = uuid();
 
-                    // Create appointment data
-                    $appointmentData = [
-                        'uuid' => $appointmentUuid,
-                        'booking_group_id' => $bookingGroupId,
-                        'service_uuid' => $actualServiceUuid,
-                        'user_uuid' => $userUuid,
-                        'pet_uuid' => $pet_uuid,
-                        'date' => $date,
-                        'time' => $time,
-                        'note' => $appointmentNote
-                    ];
+                        // Create appointment data
+                        $appointmentData = [
+                            'uuid' => $appointmentUuid,
+                            'booking_group_id' => $bookingGroupId,
+                            'service_uuid' => $actualServiceUuid,
+                            'user_uuid' => $userUuid,
+                            'pet_uuid' => $pet_uuid,
+                            'date' => $date,
+                            'time' => $time,
+                            'note' => $appointmentNote
+                        ];
 
-                    $response = Appointments::storeWithGroup($appointmentData);
-                    if ($response['success']) {
-                        $successCount++;
+                        $response = Appointments::storeWithGroup($appointmentData);
+                        if ($response['success']) {
+                            $successCount++;
+                        }
                     }
                 }
 
@@ -167,11 +178,15 @@ try {
                 $conn->commit();
 
                 if ($successCount === $appointmentCount) {
+                    $petCount = count($pet_uuids);
+                    $serviceCount = count($service_uuids);
+                    $message = $appointmentCount > 1
+                        ? "Successfully booked {$appointmentCount} appointments for {$petCount} pet(s) with {$serviceCount} service(s)! We will contact you to confirm."
+                        : "Appointment booked successfully! We will contact you to confirm.";
+
                     echo json_encode([
                         'success' => true,
-                        'message' => $appointmentCount > 1
-                            ? "Successfully booked {$appointmentCount} appointments! We will contact you to confirm."
-                            : "Appointment booked successfully! We will contact you to confirm.",
+                        'message' => $message,
                         'booking_group_id' => $bookingGroupId,
                         'count' => $successCount
                     ]);

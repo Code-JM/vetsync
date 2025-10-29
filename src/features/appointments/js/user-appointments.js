@@ -209,7 +209,24 @@ function createAppointmentGroupCard(appointmentGroup) {
         firstAppointment.status === "accepted";
     const canDelete = firstAppointment.status === "cancelled";
 
-    const serviceCount = appointmentGroup.length;
+    // Get unique pets and services
+    const uniquePets = [
+        ...new Set(
+            appointmentGroup.map(
+                (app) =>
+                    app.pet_name + (app.pet_breed ? ` (${app.pet_breed})` : "")
+            )
+        ),
+    ];
+
+    const uniqueServices = [
+        ...new Set(
+            appointmentGroup.map((app) => app.service_name || "Custom Service")
+        ),
+    ];
+
+    const petCount = uniquePets.length;
+    const serviceCount = uniqueServices.length;
 
     return `
         <div class="appointment-listing appointment-group" data-group-id="${
@@ -218,7 +235,9 @@ function createAppointmentGroupCard(appointmentGroup) {
             <div class="appointment-header">
                 <h3>
                     <span class="ui label teal">Group Booking</span>
-                    ${serviceCount} Services
+                    ${serviceCount} Service${
+        serviceCount > 1 ? "s" : ""
+    } × ${petCount} Pet${petCount > 1 ? "s" : ""}
                 </h3>
                 <span class="appointment-status ${statusInfo.class}">${
         statusInfo.label
@@ -240,22 +259,22 @@ function createAppointmentGroupCard(appointmentGroup) {
                 </div>
                 <div class="detail-item">
                     <span class="emoji">🐾</span>
-                    <strong>Pet:</strong> ${firstAppointment.pet_name}${
-        firstAppointment.pet_breed ? ` (${firstAppointment.pet_breed})` : ""
-    }
+                    <strong>Pet${
+                        petCount > 1 ? "s" : ""
+                    }:</strong> ${uniquePets.join(", ")}
                 </div>
             </div>
             <div class="appointment-services-list" style="margin: 1rem 0; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
                 <strong style="display: block; margin-bottom: 0.5rem;">📋 Services in this booking:</strong>
-                ${appointmentGroup
+                ${uniqueServices
                     .map(
-                        (app, index) => `
+                        (service, index) => `
                     <div style="padding: 0.5rem 0; border-bottom: ${
-                        index < appointmentGroup.length - 1
+                        index < uniqueServices.length - 1
                             ? "1px solid #e0e0e0"
                             : "none"
                     };">
-                        ${index + 1}. ${app.service_name || "Custom Service"}
+                        ${index + 1}. ${service}
                     </div>
                 `
                     )
@@ -268,7 +287,7 @@ function createAppointmentGroupCard(appointmentGroup) {
                               .map(
                                   (app) => `
                     <button class="btn btn-outline-danger btn-cancel" data-uuid="${app.uuid}" style="margin: 0.25rem;">
-                        <span class="emoji">❌</span> Cancel ${app.service_name}
+                        <span class="emoji">❌</span> Cancel ${app.service_name} - ${app.pet_name}
                     </button>
                 `
                               )

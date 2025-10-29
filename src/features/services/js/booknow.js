@@ -206,8 +206,13 @@ document.addEventListener("DOMContentLoaded", function () {
                             );
                         });
 
-                        // Initialize pet dropdown first
-                        $("#bookNowPetDropdown").dropdown();
+                        // Initialize multi-select dropdown for pets
+                        $("#bookNowPetDropdown").dropdown({
+                            placeholder: "Select one or more pets",
+                            allowAdditions: false,
+                            hideAdditions: true,
+                            minCharacters: 0,
+                        });
 
                         // Initialize multi-select dropdown for services
                         $("#bookNowServiceDropdown").dropdown({
@@ -444,12 +449,12 @@ $(function () {
                     },
                 ],
             },
-            pet_uuid: {
-                identifier: "pet_uuid",
+            pet_uuids: {
+                identifier: "pet_uuids[]",
                 rules: [
                     {
                         type: "empty",
-                        prompt: "Please select a pet",
+                        prompt: "Please select at least one pet",
                     },
                 ],
             },
@@ -509,6 +514,30 @@ $(function () {
                 $("#bookNowServiceDropdown").parent().removeClass("error");
             }
 
+            // Get selected pets (same logic as services)
+            const selectedPets = $("#bookNowPetDropdown").dropdown("get value");
+
+            // Handle both array and string returns for pets
+            let petUuids = [];
+            if (Array.isArray(selectedPets)) {
+                petUuids = selectedPets;
+            } else if (typeof selectedPets === "string") {
+                petUuids = selectedPets ? selectedPets.split(",") : [];
+            }
+
+            // Manual validation for pets
+            if (petUuids.length === 0) {
+                $("#bookNowForm").form(
+                    "add prompt",
+                    "pet_uuids[]",
+                    "Please select at least one pet"
+                );
+                $("#bookNowPetDropdown").parent().addClass("error");
+                return false;
+            } else {
+                $("#bookNowPetDropdown").parent().removeClass("error");
+            }
+
             // Custom validation for "Others" service
             const customServiceRequest = fields.custom_service_request;
 
@@ -528,7 +557,7 @@ $(function () {
             const formData = new FormData();
             formData.append("action", "add_multiple");
             formData.append("service_uuids", JSON.stringify(serviceUuids));
-            formData.append("pet_uuid", fields.pet_uuid);
+            formData.append("pet_uuids", JSON.stringify(petUuids));
             formData.append("date", fields.date);
             formData.append("time", fields.time); // Changed from fields.time_slot
             formData.append("note", fields.special_request || "");
