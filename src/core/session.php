@@ -2,8 +2,10 @@
 
 use VetSync\Services\SessionManager;
 
-$sessionName = $_ENV['SESSION_NAME'] ?? 'VETSYNC_SESSION';
-$sessionLifetime = ($_ENV['SESSION_LIFETIME'] ?? 120) * 60; // convert minutes to seconds
+// env() function is already defined in config.php which loads before this file
+
+$sessionName = env('SESSION_NAME', 'VETSYNC_SESSION');
+$sessionLifetime = (env('SESSION_LIFETIME', 120)) * 60; // convert minutes to seconds
 
 // Configure session settings
 ini_set('session.gc_maxlifetime', $sessionLifetime);
@@ -11,7 +13,7 @@ ini_set('session.cookie_lifetime', $sessionLifetime);
 ini_set('session.use_strict_mode', 1); // Prevents session fixation attacks
 ini_set('session.cookie_httponly', 1); // Prevents JavaScript access to session cookie
 ini_set('session.use_only_cookies', 1); // Forces sessions to only use cookies
-ini_set('session.cookie_secure', $_ENV['APP_ENV'] === 'production' ? 1 : 0); // Secure in production
+ini_set('session.cookie_secure', env('APP_ENV', 'local') === 'production' ? 1 : 0); // Secure in production
 
 // Start the session if not already started
 session_name($sessionName);

@@ -79,12 +79,12 @@
             </div>
         </div>
 
-        <!-- Email (Read-only) -->
+        <!-- Email -->
         <div class="field">
             <label for="email">Email Address *</label>
-            <input type="email" placeholder="Enter your email" name="email" value="" class="readonly-field" readonly>
+            <input type="email" placeholder="Enter your email" name="email" value="">
             <div class="ui small text">
-                <i class="lock icon"></i> Email address cannot be changed. Contact support if you need to update it.
+                This is your email address. It will be used for login and communications.
             </div>
         </div>
 

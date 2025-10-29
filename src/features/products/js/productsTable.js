@@ -133,9 +133,9 @@ function renderProducts(products = []) {
         }" class="ui mini image" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
                 </td>
                 <td>${product.name}</td>
-                <td>${product.category}</td>
+                <td>${product.category.label}</td>
                 <td>₱${parseFloat(product.og_price).toFixed(2)}</td>
-                <td>${product.status}</td>
+                <td>${product.status.label}</td>
                 <td>
                     ${
                         product.tagsCount > 0
@@ -151,6 +151,7 @@ function renderProducts(products = []) {
                     }
                 </td>
                 <td>${product.created_at}</td>
+                <td>${product.updated_at}</td>
                 <td>
                     <div class="ui compact menu">
                         <div class="ui simple dropdown item">

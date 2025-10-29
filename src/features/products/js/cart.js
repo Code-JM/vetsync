@@ -136,30 +136,30 @@ const Cart = {
 
     bindEvents() {
         // Add to cart buttons (for product pages)
-        $(document).on("click", ".add-to-cart-btn", (e) => {
-            e.preventDefault();
+        // $(document).on("click", ".add-to-cart-btn", (e) => {
+        //     e.preventDefault();
 
-            // Check if button is disabled (for unavailable products)
-            if ($(e.currentTarget).hasClass("disabled")) {
-                return false;
-            }
+        //     // Check if button is disabled (for unavailable products)
+        //     if ($(e.currentTarget).hasClass("disabled")) {
+        //         return false;
+        //     }
 
-            const productUuid = $(e.currentTarget)
-                .closest(".product-listing")
-                .data("product-uuid");
-            const quantity = parseInt(
-                $(e.currentTarget)
-                    .closest(".product-listing")
-                    .find(".quantity-selector")
-                    .val() || 1
-            );
-            const size = $(e.currentTarget)
-                .closest(".product-listing")
-                .find(".size-selector")
-                .val();
+        //     const productUuid = $(e.currentTarget)
+        //         .closest(".product-listing")
+        //         .data("product-uuid");
+        //     const quantity = parseInt(
+        //         $(e.currentTarget)
+        //             .closest(".product-listing")
+        //             .find(".quantity-selector")
+        //             .val() || 1
+        //     );
+        //     const size = $(e.currentTarget)
+        //         .closest(".product-listing")
+        //         .find(".size-selector")
+        //         .val();
 
-            this.addToCart(productUuid, quantity, size);
-        });
+        //     this.addToCart(productUuid, quantity, size);
+        // });
 
         // Size selector for add to cart
         $(document).on("click", ".size-option", function () {
@@ -398,6 +398,8 @@ const Cart = {
                 ? "Ready for Pickup"
                 : status === "picked_up"
                 ? "Picked Up"
+                : status === "rejected"
+                ? "Cancelled"
                 : status.charAt(0).toUpperCase() + status.slice(1);
 
         const statusIcon =
@@ -778,8 +780,8 @@ const Cart = {
             },
             rejected: {
                 icon: "bx-x-circle",
-                title: "No Rejected Reservations",
-                message: "You have no rejected reservations.",
+                title: "No Cancelled Reservations",
+                message: "You have no cancelled reservations.",
             },
             picked_up: {
                 icon: "bx-check-double",

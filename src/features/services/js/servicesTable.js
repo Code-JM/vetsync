@@ -225,8 +225,8 @@ function renderServices(services) {
                         ${service.status.label}
                     </span>
                 </td>
-                <td>${service.created_at}</td>
-                <td>${service.updated_at}</td>
+               <td>${service.created_at_formatted}</td>
+<td>${service.updated_at_formatted}</td>
                 <td>
                     <div class="ui compact floating selection dropdown actions-dd">
                         <i class="dropdown icon"></i>

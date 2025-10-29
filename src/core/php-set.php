@@ -8,8 +8,15 @@ ini_set('post_max_size', '10M');
 
 // PHP Error Reporting
 ini_set('log_errors', 1);
-ini_set('error_log', $config['root_path'] . '/logs/error.log');
-if ($_ENV['APP_DEBUG']) {
+$logPath = __DIR__ . '/../../logs/error.log';
+if (!is_dir(dirname($logPath))) {
+    @mkdir(dirname($logPath), 0755, true);
+}
+ini_set('error_log', $logPath);
+
+// Enable errors for local development
+$appDebug = $_ENV['APP_DEBUG'] ?? $_SERVER['APP_DEBUG'] ?? getenv('APP_DEBUG') ?: 'true';
+if ($appDebug === 'true' || $appDebug === '1' || $appDebug === true) {
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
     error_reporting(E_ALL);
@@ -19,7 +26,8 @@ if ($_ENV['APP_DEBUG']) {
 }
 
 // Set timezone
-date_default_timezone_set($_ENV['TIMEZONE']);
+$timezone = $_ENV['TIMEZONE'] ?? $_SERVER['TIMEZONE'] ?? getenv('TIMEZONE') ?: 'Asia/Manila';
+date_default_timezone_set($timezone);
 
 // Enable OPcache
 if (function_exists('opcache_reset')) {
@@ -45,11 +53,11 @@ ini_set('expose_php', 0);
 ini_set('max_input_time', '60');
 ini_set('max_input_vars', '1000');
 
-// Output compression
-if (extension_loaded('zlib')) {
-    ini_set('zlib.output_compression', 1);
-    ini_set('zlib.output_compression_level', -1);
-}
+// Output compression (disabled for local development to avoid encoding errors)
+// if (extension_loaded('zlib')) {
+//     ini_set('zlib.output_compression', 1);
+//     ini_set('zlib.output_compression_level', -1);
+// }
 
-// Disable functions
-ini_set('disable_functions', 'exec,passthru,shell_exec,system,proc_open,popen,curl_exec,curl_multi_exec,parse_ini_file,show_source');
+// Disable functions (disabled for local development)
+// ini_set('disable_functions', 'exec,passthru,shell_exec,system,proc_open,popen,parse_ini_file,show_source');

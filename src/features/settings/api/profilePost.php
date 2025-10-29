@@ -72,7 +72,7 @@ try {
     } else if ($action === 'profile-update') {
 
         // Handle regular profile updates
-        $required_fields = ['firstname', 'lastname', 'telephone', 'location'];
+        $required_fields = ['firstname', 'lastname', 'email', 'telephone', 'location'];
         foreach ($required_fields as $field) {
             if (!isset($_POST[$field]) || trim($_POST[$field]) === '') {
                 $response = [
@@ -88,6 +88,7 @@ try {
             'user_uuid' => $user_uuid,
             'firstname' => trim($_POST['firstname']),
             'lastname' => trim($_POST['lastname']),
+            'email' => trim($_POST['email']),
             'telephone' => trim($_POST['telephone']),
             'location' => trim($_POST['location']),
         ];

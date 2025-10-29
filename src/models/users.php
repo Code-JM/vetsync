@@ -364,6 +364,7 @@ class Users
                 UPDATE users SET 
                     firstname=?, 
                     lastname=?, 
+                    email=?, 
                     telephone=?, 
                     location=?
                 WHERE uuid=?
@@ -372,6 +373,7 @@ class Users
             $stmt->execute([
                 $data['firstname'],
                 $data['lastname'],
+                $data['email'],
                 $data['telephone'],
                 $data['location'],
                 $data['user_uuid']

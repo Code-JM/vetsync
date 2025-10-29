@@ -904,7 +904,7 @@
             </button>
             <button class="cart-tab" data-tab="rejected">
                 <i class='bx bx-x-circle'></i>
-                <span>Rejected</span>
+                <span>Cancelled</span>
                 <span class="count-badge" id="rejectedCount">0</span>
             </button>
         </div>
