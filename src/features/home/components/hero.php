@@ -196,11 +196,9 @@
                             </div>
                         </div>
                         <p class="hero-description">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa nam sequi
-                            officia
-                            officiis deleniti! Est commodi impedit laborum adipisci quos quod id,
-                            atque
-                            exercitationem voluptas excepturi, aliquid sit ad magni quidem illo.
+                            A full-service veterinary clinic providing comprehensive care for your pets. We offer a wide
+                            range of services to meet the needs of your furry family members. From routine check-ups to
+                            specialized treatments, we are here to help your pets live their best lives.
                         </p>
                         <div class="cta-buttons">
                             <a href="../../app/auth/index.php" class="cta-button primary">
